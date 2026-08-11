@@ -61,4 +61,9 @@ void main() {
       throwsUnsupportedError,
     );
   });
+
+  test('Create an UrgentTask', () {
+    UrgentTask urgentTask = UrgentTask('1', 'Urgent Task', 'This is urgent');
+    expect(urgentTask.priority, TaskPriority.high);
+  });
 }
