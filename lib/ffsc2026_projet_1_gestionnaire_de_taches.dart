@@ -39,6 +39,11 @@ class Task {
   });
 }
 
+class UrgentTask extends Task {
+  UrgentTask(String id, String title, String description, {DateTime? dueDate})
+    : super(id, title, TaskPriority.high, dueDate: dueDate);
+}
+
 enum TaskPriority { low, medium, high }
 
 void run() {
