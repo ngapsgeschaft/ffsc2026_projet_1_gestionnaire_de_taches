@@ -1,8 +1,45 @@
 import 'dart:io';
 
-int calculate() {
-  return 6 * 7;
+class TaskManager {
+  final List<Task> _tasks = [];
+
+  void addTask(Task aTask) {
+    _tasks.add(aTask);
+  }
+
+  Task getTaskById(String id) {
+    return _tasks.firstWhere((task) => task.id == id);
+  }
+
+  void removeTask(Task aTask) {
+    _tasks.remove(aTask);
+  }
+
+  List<Task> get tasks => List.unmodifiable(_tasks);
+
+  void markTaskCompleted(String aTaskId) {
+    final task = getTaskById(aTaskId);
+    task.isCompleted = true;
+  }
 }
+
+class Task {
+  final String id;
+  String title;
+  TaskPriority priority;
+  DateTime? dueDate;
+  bool isCompleted;
+
+  Task(
+    this.id,
+    this.title,
+    this.priority, {
+    this.dueDate,
+    this.isCompleted = false,
+  });
+}
+
+enum TaskPriority { low, medium, high }
 
 void run() {
   introduce();
