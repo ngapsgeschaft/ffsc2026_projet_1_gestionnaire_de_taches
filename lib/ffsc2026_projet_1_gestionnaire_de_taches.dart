@@ -87,15 +87,20 @@ class TaskNotFoundException implements Exception {
   String toString() => 'TaskNotFoundException: $message';
 }
 
-class Task {
+abstract class GenericTask {
   final String id;
+
+  GenericTask({required this.id});
+}
+
+class Task extends GenericTask {
   final String title;
   final TaskPriority priority;
   final DateTime? dueDate;
   final bool isCompleted;
 
   Task({
-    required this.id,
+    required super.id,
     required this.title,
     required this.priority,
     this.dueDate,
