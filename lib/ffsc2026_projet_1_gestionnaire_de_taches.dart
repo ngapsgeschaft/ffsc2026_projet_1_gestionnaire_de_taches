@@ -85,6 +85,11 @@ class Task {
   }
 
   @override
+  String toString() {
+    return 'Task(id: $id, titre: $title, priority: ${priority.designation}, due date: ${dueDate ?? ''}, isCompleted: ${isCompleted ? 'oui' : 'non'} )';
+  }
+
+  @override
   int get hashCode => Object.hash(id, title, priority, dueDate, isCompleted);
 
   Task copyWith({
@@ -102,7 +107,19 @@ class Task {
   );
 }
 
-enum TaskPriority { low, medium, high }
+enum TaskPriority {
+  low('Low'),
+  medium('Medium'),
+  high('High');
+
+  const TaskPriority(this.designation);
+  final String designation;
+
+  @override
+  String toString() {
+    return designation;
+  }
+}
 
 abstract class Repository<T> {
   List<T> getAll();
@@ -118,16 +135,16 @@ bool executeAndTerminate(UserChoice choice, TaskRepository taskRepository) {
   } else {
     switch (choice) {
       case UserChoice.createTask:
-        createTask();
+        createTask(taskRepository);
         break;
       case UserChoice.deleteTask:
-        deleteTask();
+        deleteTask(taskRepository);
         break;
       case UserChoice.listTasks:
-        listTasks();
+        listTasks(taskRepository);
         break;
       case UserChoice.markTaskCompleted:
-        markAsComplete();
+        markAsComplete(taskRepository);
         break;
       default:
     }
@@ -135,20 +152,67 @@ bool executeAndTerminate(UserChoice choice, TaskRepository taskRepository) {
   }
 }
 
-void markAsComplete() {
-  print('Mark a task as completed.');
+void markAsComplete(TaskRepository taskRepository) {
+  print('Veuillez entrer l\'id de la tâche:');
+  String? id = stdin.readLineSync();
+  try {
+    Task task = taskRepository.getById(id ?? '').copyWith(isCompleted: true);
+    taskRepository.update(task);
+    print('Tâche accomplie avec succès!');
+  } on TaskNotFoundException {
+    print('Tâche avec l\'id \'$id\' introuvée.');
+  }
 }
 
-void listTasks() {
-  print('List all tasks.');
+void listTasks(TaskRepository taskRepository) {
+  List<Task> tasks = taskRepository.getAll();
+  if (tasks.isEmpty) {
+    print('\t>>>>> Liste de tâches vide <<<<<');
+  } else {
+    for (var task in tasks) {
+      print(task);
+    }
+  }
 }
 
-void deleteTask() {
-  print('Delete a task.');
+void deleteTask(TaskRepository taskRepository) {
+  print('Veuillez entrer l\'id de la tâche à supprimer');
+  String? id = stdin.readLineSync();
+  taskRepository.delete(id ?? '');
+  print('Tâche supprimée avec succès!');
 }
 
-void createTask() {
-  print('Create a task.');
+void createTask(TaskRepository taskRepository) {
+  print('Entrez les détails de la tâche.');
+  print('Id:');
+  String? id = stdin.readLineSync();
+  print('Title:');
+  String? title = stdin.readLineSync();
+  print('Priority ([low]/medium/high):');
+  String? priority = stdin.readLineSync();
+  print('Due date (YYYY-MM-DD):');
+  String? dueDate = stdin.readLineSync();
+  print('Tâche complète (oui/[non]):');
+  String? isComplete = stdin.readLineSync();
+  Task task = Task(
+    id: id ?? 'X',
+    title: title ?? 'Titre X',
+    priority: parseTaskPriority(priority) ?? TaskPriority.low,
+    dueDate: DateTime.tryParse(dueDate ?? ''),
+    isCompleted: bool.tryParse(isComplete ?? '') ?? false,
+  );
+  taskRepository.add(task);
+  print('Tâche ajoutée avec succès!');
+  print(task);
+}
+
+TaskPriority? parseTaskPriority(String? priority) {
+  for (var p in TaskPriority.values) {
+    if (p.designation == priority) {
+      return p;
+    }
+  }
+  return null;
 }
 
 void quit() {
