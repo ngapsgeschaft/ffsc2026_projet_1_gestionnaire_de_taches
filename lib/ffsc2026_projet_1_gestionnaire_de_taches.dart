@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:core';
 import 'dart:io';
 
 void run() {
@@ -105,6 +107,29 @@ class Task {
     dueDate: dueDate ?? this.dueDate,
     isCompleted: isCompleted ?? this.isCompleted,
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'priority': priority.name,
+    'dueDate': dueDate?.toIso8601String(),
+    'isCompleted': isCompleted,
+  };
+
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      priority: TaskPriority.values.firstWhere(
+        (p) => p.name == json['priority'] as String,
+        orElse: () => TaskPriority.low,
+      ),
+      dueDate: json['dueDate'] == null
+          ? null
+          : DateTime.parse(json['dueDate'] as String),
+      isCompleted: json['isCompleted'] as bool? ?? false,
+    );
+  }
 }
 
 enum TaskPriority {
