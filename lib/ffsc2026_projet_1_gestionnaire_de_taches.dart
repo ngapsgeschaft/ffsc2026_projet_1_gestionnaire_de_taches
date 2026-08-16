@@ -41,7 +41,15 @@ class TaskRepository implements Repository<Task> {
 
   @override
   List<Task> getAll() {
-    return List.unmodifiable(_tasks);
+    return List.unmodifiable(sortByPriority(_tasks));
+  }
+
+  List<Task> sortByPriority(List<Task> tasks) {
+    final sorted = List<Task>.from(tasks);
+    sorted.sort((a, b) {
+      return b.priority.level.compareTo(a.priority.level);
+    });
+    return sorted;
   }
 
   @override
@@ -160,11 +168,12 @@ class Task extends GenericTask {
 }
 
 enum TaskPriority {
-  low('Low'),
-  medium('Medium'),
-  high('High');
+  low(1, 'Low'),
+  medium(2, 'Medium'),
+  high(3, 'High');
 
-  const TaskPriority(this.designation);
+  const TaskPriority(this.level, this.designation);
+  final int level;
   final String designation;
 
   @override
