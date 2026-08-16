@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
-void run() {
+void run() async {
   introduce();
   bool terminate = false;
   TaskRepository taskRepository = TaskRepository();
+  await taskRepository.loadFromFile();
   while (!terminate) {
     printMenu();
     print('Veuillez entrer votre choix :');
@@ -18,10 +19,15 @@ void run() {
       print('\nChoix "$input" invalide. Veuillez réessayer.');
     }
   }
+  print('Merci d\'avoir utilisé ce gestionnaire de tâches.\n');
+  print('Enregistrement des tâches dans un fichier...');
+  await taskRepository.saveToFile();
+  print('Enregistrement terminé avec succès!');
 }
 
 class TaskRepository implements Repository<Task> {
-  final List<Task> _tasks = [];
+  List<Task> _tasks = [];
+  final _filePath = 'tasks.json';
 
   @override
   void add(Task task) {
@@ -54,6 +60,22 @@ class TaskRepository implements Repository<Task> {
         _tasks[i] = aTask.copyWith();
       }
     }
+  }
+
+  Future<void> loadFromFile() async {
+    final file = File(_filePath);
+    if (await file.exists()) {
+      final raw = await file.readAsString();
+      final list = json.decode(raw) as List<dynamic>;
+      _tasks = list
+          .map((e) => Task.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+  }
+
+  Future<void> saveToFile() async {
+    final jsonList = _tasks.map((t) => t.toJson()).toList();
+    await File(_filePath).writeAsString(json.encode(jsonList));
   }
 }
 
