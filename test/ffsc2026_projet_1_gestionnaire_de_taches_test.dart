@@ -6,64 +6,105 @@ void main() {
     expect(() => getUserChoice('invalid'), throwsA(isA<ChoiceException>()));
   });
 
-  test('Add a task', () {
-    TaskManager taskManager = TaskManager();
-    Task task = Task('1', 'Test Task', TaskPriority.medium);
-    taskManager.addTask(task);
-    expect(taskManager.tasks.length, 1);
+  test('Add a task in the repository', () {
+    TaskRepository taskRepository = TaskRepository();
+    Task task = Task(
+      id: '1',
+      title: 'Test Task',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    taskRepository.add(task);
+    expect(taskRepository.getAll().length, 1);
   });
 
-  test('Mark a task as completed', () {
-    TaskManager taskManager = TaskManager();
-    Task task1 = Task('1', 'Task 1', TaskPriority.low);
-    Task task2 = Task('2', 'Task 2', TaskPriority.high);
-    taskManager.addTask(task1);
-    taskManager.addTask(task2);
-    expect(task1.isCompleted, false);
-    taskManager.markTaskCompleted('1');
-    expect(task1.isCompleted, true);
+  test('Mark a task in the repository as completed', () {
+    TaskRepository taskRepository = TaskRepository();
+    Task task = Task(
+      id: '1',
+      title: 'Test Task 1',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    taskRepository.add(task);
+    expect(task.isCompleted, false);
+    Task taskCompleted = task.copyWith(isCompleted: true);
+    taskRepository.update(taskCompleted);
+    expect(taskRepository.getById(taskCompleted.id).isCompleted, true);
   });
 
-  test('Remove a task', () {
-    TaskManager taskManager = TaskManager();
-    Task task1 = Task('1', 'Task 1', TaskPriority.low);
-    Task task2 = Task('2', 'Task 2', TaskPriority.high);
-    taskManager.addTask(task1);
-    taskManager.addTask(task2);
+  test('Remove a task from the repository', () {
+    TaskRepository taskRepository = TaskRepository();
+    Task task1 = Task(
+      id: '1',
+      title: 'Test Task 1',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    Task task2 = Task(
+      id: '2',
+      title: 'Test Task 2',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    taskRepository.add(task1);
+    taskRepository.add(task2);
 
-    expect(taskManager.tasks.length, 2);
-    taskManager.removeTask(task1);
-    expect(taskManager.tasks.length, 1);
+    expect(taskRepository.getAll().length, 2);
+    taskRepository.delete(task2.id);
+    expect(taskRepository.getAll().length, 1);
   });
 
   test('Get task by ID', () {
-    TaskManager taskManager = TaskManager();
-    Task task1 = Task('1', 'Task 1', TaskPriority.low);
-    Task task2 = Task('2', 'Task 2', TaskPriority.high);
-    taskManager.addTask(task1);
-    taskManager.addTask(task2);
+    TaskRepository taskRepository = TaskRepository();
+    Task task1 = Task(
+      id: '1',
+      title: 'Test Task 1',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    Task task2 = Task(
+      id: '2',
+      title: 'Test Task 2',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    taskRepository.add(task1);
+    taskRepository.add(task2);
 
-    Task foundTask = taskManager.getTaskById('2');
-    expect(foundTask.title, 'Task 2');
+    Task foundTask = taskRepository.getById('2');
+    expect(foundTask.title, 'Test Task 2');
   });
 
   test('Get unmodifiable list of tasks', () {
-    TaskManager taskManager = TaskManager();
-    Task task1 = Task('1', 'Task 1', TaskPriority.low);
-    Task task2 = Task('2', 'Task 2', TaskPriority.high);
-    taskManager.addTask(task1);
-    taskManager.addTask(task2);
+    TaskRepository taskRepository = TaskRepository();
+    Task task1 = Task(
+      id: '1',
+      title: 'Test Task 1',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    Task task2 = Task(
+      id: '2',
+      title: 'Test Task 2',
+      priority: TaskPriority.medium,
+      isCompleted: false,
+    );
+    taskRepository.add(task1);
+    taskRepository.add(task2);
 
-    List<Task> unmodifiableTasks = taskManager.tasks;
+    List<Task> unmodifiableTasks = taskRepository.getAll();
     expect(unmodifiableTasks.length, 2);
     expect(
-      () => unmodifiableTasks.add(Task('3', 'Task 3', TaskPriority.medium)),
+      () => unmodifiableTasks.add(
+        Task(
+          id: '2',
+          title: 'Test Task 2',
+          priority: TaskPriority.medium,
+          isCompleted: false,
+        ),
+      ),
       throwsUnsupportedError,
     );
-  });
-
-  test('Create an UrgentTask', () {
-    UrgentTask urgentTask = UrgentTask('1', 'Urgent Task', 'This is urgent');
-    expect(urgentTask.priority, TaskPriority.high);
   });
 }
